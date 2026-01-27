@@ -14,7 +14,7 @@ export function ListTask({ task }: ListTaskProps) {
   const { deleteTask, tasks } = useListTask()
   const [checked, setChecked] = useState(false)
   const { selectionTypeTask } = useNavigation()
-  const { register, handleSubmit } = useForm<Inputs>()
+  const { register } = useForm<Inputs>()
 
   const handleCheckboxChange = useCallback(
     (value: boolean) => {
