@@ -6,6 +6,7 @@ import { Text } from '../components/text'
 import { TextArea } from '../components/textArea'
 import { Input } from '../components/textInput'
 import { Inputs, ListTasksProps, useListTask, useNavigation } from '../context'
+
 type ListTaskProps = {
   task: ListTasksProps
 }
