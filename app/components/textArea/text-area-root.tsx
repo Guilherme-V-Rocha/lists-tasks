@@ -1,16 +1,19 @@
+import clsx from 'clsx'
 import { ReactNode } from 'react'
 
 interface TextAreaRootProps {
   children: ReactNode
+  hasError?: boolean
 }
-export function TextAreaRoot(props: TextAreaRootProps) {
+export function TextAreaRoot({ children, hasError }: TextAreaRootProps) {
   return (
     <div
-      className={
-        'w-full px-4 py-2 mb-6 border border-zinc-300 rounded focus-within:ring-2 ring-indigo-600'
-      }
+      className={clsx(
+        'w-full px-4 py-2 border border-zinc-300 rounded focus-within:ring-2',
+        hasError ? 'ring-red-600' : 'ring-indigo-600',
+      )}
     >
-      {props.children}
+      {children}
     </div>
   )
 }
