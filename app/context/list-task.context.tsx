@@ -27,6 +27,8 @@ type ListTaskContextProps = {
   toggleTaskStatus: (id: string, checked: boolean) => void
   isDelete?: string
   setIsDelete: Dispatch<SetStateAction<string | undefined>>
+  isEditing: boolean
+  setIsEditing: Dispatch<SetStateAction<boolean>>
   updateTask: (task: ListTasksProps) => void
 }
 
@@ -37,6 +39,7 @@ const ListTaskContext = createContext<ListTaskContextProps>(
 const ListTaskProvider = ({ children }: { children: React.ReactNode }) => {
   const [listTasks, setListTasks] = useState<Array<ListTasksProps>>([])
   const [isDelete, setIsDelete] = useState<string>()
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     if (listTasks.length > 0) {
@@ -89,9 +92,11 @@ const ListTaskProvider = ({ children }: { children: React.ReactNode }) => {
       deleteTask,
       isDelete,
       setIsDelete,
+      isEditing,
+      setIsEditing,
       updateTask,
     }),
-    [listTasks, isDelete, toggleTaskStatus, deleteTask, updateTask],
+    [listTasks, isDelete, toggleTaskStatus, deleteTask, updateTask, isEditing],
   )
 
   return (
