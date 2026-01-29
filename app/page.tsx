@@ -1,5 +1,6 @@
 'use client'
 
+import clsx from 'clsx'
 import { useMemo } from 'react'
 import { AddTask } from './addTask'
 import { useAddTask } from './context'
@@ -28,7 +29,14 @@ export default function Home() {
         <div className="w-full rounded-lg bg-white border border-zinc-200 shadow-xl overflow-hidden">
           <Navigation />
 
-          <section className="h-112 overflow-y-auto p-4 space-y-4">
+          <section
+            className={clsx(
+              'h-112 overflow-y-auto p-4 space-y-4',
+              filteredTasks.length === 0 &&
+                addIsTask === false &&
+                'flex justify-center',
+            )}
+          >
             {addIsTask ? (
               <AddTask />
             ) : filteredTasks.length > 0 ? (

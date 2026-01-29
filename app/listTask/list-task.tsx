@@ -14,8 +14,8 @@ type ListTaskProps = {
 }
 
 export function ListTask({ task }: ListTaskProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const { deleteTask, toggleTaskStatus } = useListTask()
+  const { deleteTask, toggleTaskStatus, setIsEditing, isEditing } =
+    useListTask()
   const [checked, setChecked] = useState(false)
   const { selectionTypeTask } = useNavigation()
 
