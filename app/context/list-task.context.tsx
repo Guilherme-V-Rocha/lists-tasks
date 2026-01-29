@@ -42,11 +42,7 @@ const ListTaskProvider = ({ children }: { children: React.ReactNode }) => {
   const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
-    if (listTasks.length > 0) {
-      localStorage.setItem('tasks', JSON.stringify(listTasks))
-    } else {
-      localStorage.removeItem('tasks')
-    }
+    localStorage.setItem('tasks', JSON.stringify(listTasks))
   }, [listTasks])
 
   const getData = useEffectEvent(() => {
