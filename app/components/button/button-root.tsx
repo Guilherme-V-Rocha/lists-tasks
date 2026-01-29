@@ -3,7 +3,7 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  onSubmitAction: () => void
+  onSubmitAction?: () => void
   children: ReactNode
   className?: string
 }

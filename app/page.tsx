@@ -1,8 +1,11 @@
 'use client'
+
+import { useMemo } from 'react'
 import { AddTask } from './addTask'
 import { useAddTask } from './context'
 import { useListTask } from './context/list-task.context'
 import { useNavigation } from './context/navigation-context'
+import { EmptyState } from './emptyState'
 import { HeaderTask } from './headerTask'
 import { ListTask } from './listTask'
 import { Navigation } from './navigation'
@@ -12,31 +15,30 @@ export default function Home() {
   const { listTasks } = useListTask()
   const { selectionTypeTask } = useNavigation()
 
+  const filteredTasks = useMemo(() => {
+    if (selectionTypeTask === 'all') return listTasks
+    return listTasks.filter((task) => task.status === selectionTypeTask)
+  }, [listTasks, selectionTypeTask])
+
   return (
-    <div className="flex h-dvh items-center justify-center bg-zinc-50 font-sans ">
-      <main className="flex w-full max-w-3xl flex-col items-center py-32 px-16 rounded text-black sm:items-start">
+    <div className="flex min-h-dvh items-center justify-center bg-zinc-50 font-sans p-4">
+      <main className="flex w-full max-w-3xl flex-col text-black items-center sm:items-start">
         <HeaderTask />
-        <div className="rounded w-full h-full bg-white border-zinc-800 shadow-lg">
+
+        <div className="w-full rounded-lg bg-white border border-zinc-200 shadow-xl overflow-hidden">
           <Navigation />
-          {addIsTask && <AddTask />}
-          <div className="overflow-y-auto h-112 space-y-6">
-            {!addIsTask &&
-              selectionTypeTask === 'all' &&
-              listTasks.map((value) => (
-                <ListTask key={value.id} task={value} />
-              ))}
-            {!addIsTask &&
-              listTasks
-                .filter((value) => value.status === selectionTypeTask)
-                .map((value) => <ListTask key={value.id} task={value} />)}
-          </div>
-          {addIsTask ||
-            (listTasks.length === 0 && (
-              <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500">
-                <p>Você não tem tarefas cadastradas ainda.</p>
-                <span>Crie tarefas e organize seus itens a fazer</span>
-              </div>
-            ))}
+
+          <section className="h-112 overflow-y-auto p-4 space-y-4">
+            {addIsTask ? (
+              <AddTask />
+            ) : filteredTasks.length > 0 ? (
+              filteredTasks
+                .map((task) => <ListTask key={task.id} task={task} />)
+                .reverse()
+            ) : (
+              <EmptyState />
+            )}
+          </section>
         </div>
       </main>
     </div>

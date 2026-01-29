@@ -1,5 +1,3 @@
-'use client'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import clsx from 'clsx'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -7,25 +5,35 @@ import { Button } from '../components/button'
 import { Text } from '../components/text'
 import { TextArea } from '../components/textArea'
 import { Input } from '../components/textInput'
-import { useAddTask } from '../context'
-import { AddTaskSchema, addTaskSchema } from '../schema/task-schema'
+import { ListTasksProps, useListTask } from '../context'
+import { ListTaskSchema, listTaskSchema } from '../schema/task-schema'
 
-export function AddTask() {
-  const { setAddIsTask, addTask } = useAddTask()
+type ListTaskFiltersProps = {
+  setIsEditing: (value: boolean) => void
+  task: ListTasksProps
+}
+
+export function ListTaskFilters({ setIsEditing, task }: ListTaskFiltersProps) {
+  const { updateTask } = useListTask()
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<AddTaskSchema>({
-    resolver: zodResolver(addTaskSchema),
+  } = useForm<ListTaskSchema>({
+    resolver: zodResolver(listTaskSchema),
+    values: task,
   })
-  const onSubmit: SubmitHandler<AddTaskSchema> = (data) => addTask(data)
+
+  const onSubmit: SubmitHandler<ListTaskSchema> = (data) => {
+    updateTask(data)
+    setIsEditing(false)
+  }
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
       noValidate
-      className="p-6 flex flex-col gap-4"
+      className="flex flex-col gap-6"
     >
       <label htmlFor="title">
         <Text
@@ -39,7 +47,7 @@ export function AddTask() {
       </label>
       <Input.Root hasError={!!errors.title}>
         <Input.Content
-          id="title"
+          id={`edit-title-${task.id}`}
           {...register('title')}
           placeholder="Nome da Tarefa"
           aria-invalid={errors.title ? 'true' : 'false'}
@@ -62,7 +70,7 @@ export function AddTask() {
       </label>
       <TextArea.Root hasError={!!errors.description}>
         <TextArea.Content
-          id="description"
+          id={`edit-desc-${task.id}`}
           {...register('description')}
           placeholder="Descrição da Tarefa"
           aria-invalid={errors.description ? 'true' : 'false'}
@@ -73,10 +81,10 @@ export function AddTask() {
           {errors.description.message}
         </span>
       )}
-      <div className="mt-4 flex justify-end gap-3">
+      <div className="mt-4 flex justify-end gap-4">
         <Button.Root
           type="button"
-          onSubmitAction={() => setAddIsTask(false)}
+          onSubmitAction={() => setIsEditing(false)}
           className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-700 cursor-pointer "
         >
           <Button.Content>Cancelar</Button.Content>
@@ -84,10 +92,10 @@ export function AddTask() {
         <Button.Root
           type="submit"
           disabled={isSubmitting}
-          className="rounded bg-emerald-500 px-4 py-2 text-white hover:bg-green-800 cursor-pointer"
+          className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-800 cursor-pointer"
         >
           <Button.Content>
-            {isSubmitting ? 'Salvando...' : 'Salvar Tarefa'}
+            {isSubmitting ? 'Salvando...' : 'Atualizar Tarefa'}
           </Button.Content>
         </Button.Root>
       </div>

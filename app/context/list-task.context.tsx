@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useEffectEvent,
+  useMemo,
   useState,
 } from 'react'
 
@@ -16,19 +17,17 @@ export type ListTasksProps = {
   title: string
   description: string
   checked: boolean
-  status: string
+  status: 'pending' | 'complete'
 }
 
 type ListTaskContextProps = {
   listTasks: Array<ListTasksProps>
   setListTasks: Dispatch<SetStateAction<Array<ListTasksProps>>>
   deleteTask: (id: string) => void
-  tasks: (id: string, checked: boolean) => void
+  toggleTaskStatus: (id: string, checked: boolean) => void
   isDelete?: string
   setIsDelete: Dispatch<SetStateAction<string | undefined>>
-  isEdit?: string
-  setIsEdit: Dispatch<SetStateAction<string | undefined>>
-  cancel: () => void
+  updateTask: (task: ListTasksProps) => void
 }
 
 const ListTaskContext = createContext<ListTaskContextProps>(
@@ -38,17 +37,12 @@ const ListTaskContext = createContext<ListTaskContextProps>(
 const ListTaskProvider = ({ children }: { children: React.ReactNode }) => {
   const [listTasks, setListTasks] = useState<Array<ListTasksProps>>([])
   const [isDelete, setIsDelete] = useState<string>()
-  const [isEdit, setIsEdit] = useState<string>()
-
-  const cancel = useCallback(() => {
-    setIsDelete(undefined)
-  }, [])
 
   useEffect(() => {
-    if (listTasks.length === 0) {
-      localStorage.removeItem('tasks')
-    } else {
+    if (listTasks.length > 0) {
       localStorage.setItem('tasks', JSON.stringify(listTasks))
+    } else {
+      localStorage.removeItem('tasks')
     }
   }, [listTasks])
 
@@ -63,53 +57,45 @@ const ListTaskProvider = ({ children }: { children: React.ReactNode }) => {
     getData()
   }, [])
 
-  const tasks = useCallback(
-    (id: string, checked: boolean) => {
-      const task = listTasks.find((value) => value.id === id)
-      if (checked === true && task) {
-        setListTasks((prev) =>
-          prev.map((value) =>
-            value.id === id
-              ? { ...value, checked: true, status: 'complete' }
-              : value,
-          ),
-        )
-      } else {
-        if (task) {
-          setListTasks((prev) =>
-            prev.map((value) =>
-              value.id === id
-                ? { ...value, checked: false, status: 'pending' }
-                : value,
-            ),
-          )
+  const toggleTaskStatus = useCallback((id: string, checked: boolean) => {
+    setListTasks((prev) =>
+      prev.map((task) => {
+        if (task.id !== id) return task
+        return {
+          ...task,
+          checked,
+          status: checked ? 'complete' : 'pending',
         }
-      }
-    },
-    [listTasks],
-  )
-  const deleteTask = useCallback(
-    (id: string) => {
-      setListTasks((prev) => prev.filter((value) => value.id !== id))
-      cancel()
-    },
-    [cancel],
+      }),
+    )
+  }, [])
+
+  const deleteTask = useCallback((id: string) => {
+    setListTasks((prev) => prev.filter((value) => value.id !== id))
+    setIsDelete(undefined)
+  }, [])
+
+  const updateTask = useCallback((task: ListTasksProps) => {
+    setListTasks((prev) =>
+      prev.map((value) => (value.id === task.id ? task : value)),
+    )
+  }, [])
+
+  const contextValue = useMemo(
+    () => ({
+      listTasks,
+      setListTasks,
+      toggleTaskStatus,
+      deleteTask,
+      isDelete,
+      setIsDelete,
+      updateTask,
+    }),
+    [listTasks, isDelete, toggleTaskStatus, deleteTask, updateTask],
   )
 
   return (
-    <ListTaskContext.Provider
-      value={{
-        listTasks,
-        setListTasks,
-        tasks,
-        deleteTask,
-        isDelete,
-        setIsDelete,
-        isEdit,
-        setIsEdit,
-        cancel,
-      }}
-    >
+    <ListTaskContext.Provider value={contextValue}>
       {children}
     </ListTaskContext.Provider>
   )

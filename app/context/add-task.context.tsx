@@ -1,17 +1,19 @@
 'use client'
-import { createContext, useCallback, useContext, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { AddTaskSchema } from '../schema/task-schema'
 import { useListTask } from './list-task.context'
-
-export type Inputs = {
-  title: string
-  description: string
-}
 
 type AddTaskContextProps = {
   addIsTask: boolean
   setAddIsTask: (value: boolean) => void
-  addTask: (value: Inputs) => void
+  addTask: (value: AddTaskSchema) => void
 }
 
 const AddTaskContext = createContext<AddTaskContextProps>(
@@ -20,24 +22,36 @@ const AddTaskContext = createContext<AddTaskContextProps>(
 
 const AddTaskProvider = ({ children }: { children: React.ReactNode }) => {
   const { setListTasks } = useListTask()
-  const [addIsTask, setAddIsTask] = useState<boolean>(false)
+  const [addIsTask, setAddIsTask] = useState(false)
   const id = uuidv4()
 
   const addTask = useCallback(
-    (value: Inputs) => {
-      if (value.title && value.description) {
-        setListTasks((prev) => [
-          ...prev,
-          { id: id, ...value, checked: false, status: 'pending' },
-        ])
-        setAddIsTask(false)
+    (value: AddTaskSchema) => {
+      const newTask = {
+        id: id,
+        ...value,
+        checked: false,
+        status: 'pending' as const,
       }
+      setListTasks((prev) => [...prev, newTask])
+      setAddIsTask(false)
+
+      setAddIsTask(false)
     },
-    [id, setListTasks],
+    [setListTasks, id],
+  )
+
+  const contextValue = useMemo(
+    () => ({
+      addIsTask,
+      setAddIsTask,
+      addTask,
+    }),
+    [addIsTask, addTask],
   )
 
   return (
-    <AddTaskContext.Provider value={{ addIsTask, setAddIsTask, addTask }}>
+    <AddTaskContext.Provider value={contextValue}>
       {children}
     </AddTaskContext.Provider>
   )
